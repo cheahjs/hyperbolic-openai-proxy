@@ -31,38 +31,26 @@ type HyperbolicRequest struct {
 func convertRequest(openAIRequest OpenAIRequest) HyperbolicRequest {
     var hyperbolicRequest HyperbolicRequest
 
-    switch openAIRequest.Model {
-    case "dall-e-2":
-        hyperbolicRequest.ModelName = "SD2"
-    case "dall-e-3":
-        hyperbolicRequest.ModelName = "SDXL1.0-base"
-    default:
-        log.Println("Unsupported model")
-        return hyperbolicRequest
-    }
-
+    hyperbolicRequest.ModelName = openAIRequest.Model
     hyperbolicRequest.Prompt = openAIRequest.Prompt
 
-    switch openAIRequest.Size {
-    case "256x256":
-        hyperbolicRequest.Height = 256
-        hyperbolicRequest.Width = 256
-    case "512x512":
-        hyperbolicRequest.Height = 512
-        hyperbolicRequest.Width = 512
-    case "1024x1024":
-        hyperbolicRequest.Height = 1024
-        hyperbolicRequest.Width = 1024
-    case "1792x1024":
-        hyperbolicRequest.Height = 1792
-        hyperbolicRequest.Width = 1024
-    case "1024x1792":
-        hyperbolicRequest.Height = 1024
-        hyperbolicRequest.Width = 1792
-    default:
-        log.Println("Unsupported size")
+    var sizeSplit = strings.Split(openAIRequest.Size, "x")
+    if len(sizeSplit) != 2 {
+        log.Println("Invalid size")
         return hyperbolicRequest
     }
+    height, err := strconv.Atoi(sizeSplit[0])
+    if err != nil {
+        log.Println(err)
+        return hyperbolicRequest
+    }
+    width, err := strconv.Atoi(sizeSplit[1])
+    if err != nil {
+        log.Println(err)
+        return hyperbolicRequest
+    }
+    hyperbolicRequest.Height = height
+    hyperbolicRequest.Width = width
 
     hyperbolicRequest.Backend = "auto"
 
