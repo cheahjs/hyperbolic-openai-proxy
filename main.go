@@ -90,8 +90,12 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("Authorization", "Bearer YOUR_HYPERBOLIC_API_KEY")
+    // Pass through headers from the original request
+    for key, value := range r.Header {
+        if key != "Host" {
+            req.Header.Set(key, value[0])
+        }
+    }
 
     client := &http.Client{}
     resp, err := client.Do(req)
