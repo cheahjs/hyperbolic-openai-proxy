@@ -50,7 +50,7 @@ func convertRequest(req *OpenAIRequest) (*HyperbolicRequest, error) {
 	return &hyperbolicReq, nil
 }
 
-func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAIRequest, baseURL string, imageCache *cache.ImageCache, imageStore *ImageStore) (OpenAIResponse, error) {
+func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAIRequest, baseURL string, imageManager *ImageManager) (OpenAIResponse, error) {
 	var openAIResponse OpenAIResponse
 
 	openAIResponse.Created = time.Now().Unix()
@@ -58,7 +58,7 @@ func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAI
 	for _, image := range hyperbolicResponse.Images {
 		var openAIImage OpenAIImage
 
-		filePath, err := imageStore.StoreImageWithPrompt(openAIRequest.Prompt, []byte(image.Image))
+		filePath, err := imageManager.StoreImageWithPrompt(openAIRequest.Prompt, []byte(image.Image))
 		if err != nil {
 			return openAIResponse, fmt.Errorf("failed to store image: %w", err)
 		}

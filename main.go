@@ -53,17 +53,12 @@ func main() {
 		zerolog.SetGlobalLevel(level)
 	}
 
-	var imageCache *cache.ImageCache
-	if os.Getenv("IMAGES_SAVE_PATH") == "" {
-		imageCache = cache.NewImageCache(expiryDuration, maxStoreSizeMB, time.Minute)
-	}
-
-	imageStore, err := api.NewImageStore(os.Getenv("IMAGES_SAVE_PATH"))
+	imageManager, err := api.NewImageManager(os.Getenv("IMAGES_SAVE_PATH"), expiryDuration, maxStoreSizeMB, time.Minute)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to initialize image store")
+		log.Fatal().Err(err).Msg("Failed to initialize image manager")
 	}
 
-	router := api.NewRouter(imageCache, imageStore, baseURL)
+	router := api.NewRouter(imageManager, baseURL)
 
 	listenAddr := ":8080"
 	if envListenAddr := os.Getenv("LISTEN_ADDR"); envListenAddr != "" {

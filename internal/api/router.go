@@ -15,18 +15,16 @@ import (
 
 type Router struct {
 	router     *mux.Router
-	imageCache *cache.ImageCache
-	imageStore *ImageStore
+	imageManager *ImageManager
 	baseURL    string
 }
 
-func NewRouter(imageCache *cache.ImageCache, imageStore *ImageStore, baseURL string) *Router {
+func NewRouter(imageManager *ImageManager, baseURL string) *Router {
 	r := mux.NewRouter()
 	router := &Router{
-		router:     r,
-		imageCache: imageCache,
-		imageStore: imageStore,
-		baseURL:    baseURL,
+		router:       r,
+		imageManager: imageManager,
+		baseURL:      baseURL,
 	}
 
 	r.HandleFunc("/image/generation", router.imageGenerationHandler).Methods("POST")
