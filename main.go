@@ -115,10 +115,14 @@ func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAI
 	for _, image := range hyperbolicResponse.Images {
 		var openAIImage OpenAIImage
 		if openAIRequest.ResponseFormat != nil && *openAIRequest.ResponseFormat == "url" {
-			id := generateUniqueID()
+			id, err := generateUniqueID()
+			if err != nil {
+				log.Println("Error generating unique ID:", err)
+				http.Error(w, "Failed to generate unique ID", http.StatusInternalServerError)
+				return
+			}
 
 			expiresAt := time.Now().Add(expiryDuration)
-
 			imageStore[id] = imageEntry{[]byte(image.Image), expiresAt}
 			openAIImage.URL = fmt.Sprintf("%s/images/%s", baseURL, id)
 
