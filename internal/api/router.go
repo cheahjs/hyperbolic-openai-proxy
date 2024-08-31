@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+
+	"github.com/rs/zerolog/log"
 	"net/http"
 
 	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"

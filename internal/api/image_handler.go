@@ -2,6 +2,8 @@ package api
 
 import (
 	"encoding/base64"
+
+	"github.com/rs/zerolog/log"
 	"net/http"
 
 	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
