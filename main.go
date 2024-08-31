@@ -38,7 +38,7 @@ func main() {
 		maxStoreSizeMB, _ = strconv.Atoi(maxStoreSizeStr)
 	}
 
-	imageCache := cache.NewImageCache(expiryDuration, maxStoreSizeMB)
+	imageCache := cache.NewImageCache(expiryDuration, maxStoreSizeMB, time.Minute)
 
 	router := api.NewRouter(imageCache, baseURL)
 

@@ -18,6 +18,7 @@ type ImageCache struct {
 	expiryDuration time.Duration
 	maxStoreSizeMB int
 	mu             sync.Mutex
+	cleanupInterval time.Duration
 }
 
 type imageEntry struct {
@@ -25,12 +26,22 @@ type imageEntry struct {
 	expiresAt time.Time
 }
 
-func NewImageCache(expiryDuration time.Duration, maxStoreSizeMB int) *ImageCache {
-	return &ImageCache{
+func NewImageCache(expiryDuration time.Duration, maxStoreSizeMB int, cleanupInterval time.Duration) *ImageCache {
+	c := &ImageCache{
 		store:          make(map[string]imageEntry),
 		expiryDuration: expiryDuration,
 		maxStoreSizeMB: maxStoreSizeMB,
+		cleanupInterval: cleanupInterval,
 	}
+
+	go func() {
+		for {
+			time.Sleep(c.cleanupInterval)
+			c.cleanup()
+		}
+	}()
+
+	return c
 }
 
 func (c *ImageCache) StoreImage(data []byte) (string, error) {
@@ -72,4 +83,16 @@ func (c *ImageCache) GetImage(id string) ([]byte, error) {
 	}
 
 	return entry.data, nil
+}
+
+func (c *ImageCache) cleanup() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	now := time.Now()
+	for id, entry := range c.store {
+		if now.After(entry.expiresAt) {
+			delete(c.store, id)
+		}
+	}
 }
