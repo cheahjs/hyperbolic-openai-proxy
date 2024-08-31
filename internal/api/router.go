@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
 	"github.com/gorilla/mux"
@@ -65,7 +64,8 @@ func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	hyperbolicRequest := convertRequest(openAIRequest)
+	hyperbolicRequest, err := convertRequest(&openAIRequest)
+	if err != nil {
 
 	jsonBody, err := json.Marshal(hyperbolicRequest)
 	if err != nil {
@@ -121,4 +121,3 @@ func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Requ
 
 	respondWithJSON(w, openAIResponse)
 }
-

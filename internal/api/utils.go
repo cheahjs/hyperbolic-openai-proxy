@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
