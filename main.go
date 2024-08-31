@@ -42,13 +42,6 @@ func main() {
 
 	router := api.NewRouter(imageCache, baseURL)
 
-	// Start a goroutine to clean up expired images
-	go func() {
-		for {
-			time.Sleep(time.Minute)
-			cleanupImageStore()
-		}
-	}()
 
 	listenAddr := ":8080"
 	if envListenAddr := os.Getenv("LISTEN_ADDR"); envListenAddr != "" {
