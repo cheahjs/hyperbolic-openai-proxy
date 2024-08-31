@@ -2,9 +2,9 @@ package main
 
 import (
 	"bytes"
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
-	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
