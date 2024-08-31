@@ -17,10 +17,11 @@ import (
 
 // OpenAIRequest represents an OpenAI image generation request
 type OpenAIRequest struct {
-	Model  string `json:"model"`
-	Prompt string `json:"prompt"`
-	N      int    `json:"n"`
-	Size   string `json:"size"`
+	Model         string  `json:"model"`
+	Prompt        string  `json:"prompt"`
+	N             *int    `json:"n,omitempty"`
+	Size          *string `json:"size,omitempty"`
+	ResponseFormat *string `json:"response_format,omitempty"`
 }
 
 // HyperbolicRequest represents a Hyperbolic image generation request
@@ -62,23 +63,28 @@ func convertRequest(openAIRequest OpenAIRequest) HyperbolicRequest {
 	hyperbolicRequest.ModelName = openAIRequest.Model
 	hyperbolicRequest.Prompt = openAIRequest.Prompt
 
-	var sizeSplit = strings.Split(openAIRequest.Size, "x")
-	if len(sizeSplit) != 2 {
-		log.Println("Invalid size")
-		return hyperbolicRequest
+	if openAIRequest.Size != nil {
+		var sizeSplit = strings.Split(*openAIRequest.Size, "x")
+		if len(sizeSplit) != 2 {
+			log.Println("Invalid size")
+			return hyperbolicRequest
+		}
+		height, err := strconv.Atoi(sizeSplit[0])
+		if err != nil {
+			log.Println(err)
+			return hyperbolicRequest
+		}
+		width, err := strconv.Atoi(sizeSplit[1])
+		if err != nil {
+			log.Println(err)
+			return hyperbolicRequest
+		}
+		hyperbolicRequest.Height = height
+		hyperbolicRequest.Width = width
+	} else {
+		hyperbolicRequest.Height = 1024
+		hyperbolicRequest.Width = 1024
 	}
-	height, err := strconv.Atoi(sizeSplit[0])
-	if err != nil {
-		log.Println(err)
-		return hyperbolicRequest
-	}
-	width, err := strconv.Atoi(sizeSplit[1])
-	if err != nil {
-		log.Println(err)
-		return hyperbolicRequest
-	}
-	hyperbolicRequest.Height = height
-	hyperbolicRequest.Width = width
 
 	hyperbolicRequest.Backend = "auto"
 
