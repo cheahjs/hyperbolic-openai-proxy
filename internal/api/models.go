@@ -28,5 +28,5 @@ type HyperbolicResponse struct {
 type HyperbolicImage struct {
 	Index      int    `json:"index"`
 	Image      string `json:"image"`
-	RandomSeed int64  `json:"random_seed"`
+	RandomSeed string `json:"random_seed"`
 }
