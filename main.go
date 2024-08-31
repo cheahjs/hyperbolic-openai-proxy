@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -9,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"encoding/base64"
 	"strings"
 	"time"
 
@@ -18,10 +18,10 @@ import (
 
 // OpenAIRequest represents an OpenAI image generation request
 type OpenAIRequest struct {
-	Model         string  `json:"model"`
-	Prompt        string  `json:"prompt"`
-	N             *int    `json:"n,omitempty"`
-	Size          *string `json:"size,omitempty"`
+	Model          string  `json:"model"`
+	Prompt         string  `json:"prompt"`
+	N              *int    `json:"n,omitempty"`
+	Size           *string `json:"size,omitempty"`
 	ResponseFormat *string `json:"response_format,omitempty"`
 }
 
@@ -46,6 +46,7 @@ type HyperbolicImage struct {
 	Image      string `json:"image"`
 	RandomSeed int64  `json:"random_seed"`
 }
+
 var imageStore = make(map[string][]byte)
 
 // OpenAIResponse represents an OpenAI API response
