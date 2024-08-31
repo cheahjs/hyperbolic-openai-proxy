@@ -85,7 +85,7 @@ func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Requ
 	// Pass through headers from the original request
 	for key, value := range r.Header {
 		if key != "Host" {
-			req.Header.Set(key, value[0])
+			req.Header[key] = value
 		}
 	}
 
