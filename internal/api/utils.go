@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
 )
 
 type OpenAIImage struct {
