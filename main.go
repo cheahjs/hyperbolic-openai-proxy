@@ -15,9 +15,6 @@ var (
 	baseURL         string
 	maxStoreSizeMB int
 )
-	baseURL         string
-	maxStoreSizeMB int
-)
 
 func cleanupImageStore() {
 	// TODO: Implement image store cleanup logic
