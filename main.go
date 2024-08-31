@@ -56,8 +56,8 @@ type OpenAIResponse struct {
 
 // OpenAIImage represents a generated image in the OpenAI API response
 type OpenAIImage struct {
-	B64JSON      string `json:"b64_json,omitempty"`
-	URL          string `json:"url,omitempty"`
+	B64JSON       string `json:"b64_json,omitempty"`
+	URL           string `json:"url,omitempty"`
 	RevisedPrompt string `json:"revised_prompt,omitempty"`
 }
 
