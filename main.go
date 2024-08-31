@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/hex"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -273,13 +274,12 @@ func main() {
 }
 
 func generateUniqueID() string {
-	bytes := make([]byte, 16)
-	_, err := rand.Read(bytes)
+	b := make([]byte, 16)
+	_, err := rand.Read(b)
 	if err != nil {
-		log.Println("Error generating random ID:", err)
-		return strconv.FormatInt(time.Now().UnixNano(), 10) // Fallback to timestamp-based ID
+		panic(err)
 	}
-	return hex.EncodeToString(bytes)
+	return hex.EncodeToString(b)
 }
 
 func cleanupImageStore() {
