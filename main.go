@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"encoding/base64"
 	"strings"
 	"time"
 
@@ -45,6 +46,7 @@ type HyperbolicImage struct {
 	Image      string `json:"image"`
 	RandomSeed int64  `json:"random_seed"`
 }
+var imageStore = make(map[string][]byte)
 
 // OpenAIResponse represents an OpenAI API response
 type OpenAIResponse struct {
@@ -98,11 +100,38 @@ func convertResponse(hyperbolicResponse HyperbolicResponse) OpenAIResponse {
 
 	for _, image := range hyperbolicResponse.Images {
 		var openAIImage OpenAIImage
-		openAIImage.B64JSON = image.Image
+		if openAIRequest.ResponseFormat != nil && *openAIRequest.ResponseFormat == "url" {
+			id := generateUniqueID()
+			imageStore[id] = []byte(image.Image)
+			openAIImage.B64JSON = fmt.Sprintf("http://localhost:8080/images/%s", id)
+		} else {
+			openAIImage.B64JSON = image.Image
+		}
 		openAIResponse.Data = append(openAIResponse.Data, openAIImage)
 	}
 
 	return openAIResponse
+}
+
+func imageHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	imageData, ok := imageStore[id]
+	if !ok {
+		http.Error(w, "Image not found", http.StatusNotFound)
+		return
+	}
+
+	decodedImage, err := base64.StdEncoding.DecodeString(string(imageData))
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Failed to decode image", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "image/png")
+	w.Write(decodedImage)
 }
 
 func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
@@ -190,5 +219,10 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/image/generation", imageGenerationHandler).Methods("POST")
+	r.HandleFunc("/images/{id}", imageHandler).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8080", r))
+}
+
+func generateUniqueID() string {
+	return strconv.FormatInt(time.Now().UnixNano(), 10)
 }
