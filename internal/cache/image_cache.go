@@ -4,10 +4,10 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
-
-	"github.com/rs/zerolog/log"
 	"sync"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -95,6 +95,7 @@ func (c *ImageCache) GetImage(id string) ([]byte, error) {
 
 	return entry.data, nil
 }
+
 func (c *ImageCache) cleanup() {
 	log.Debug().Msg("Cleaning up image cache")
 	c.mu.Lock()

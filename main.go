@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -10,11 +11,6 @@ import (
 	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"net/http"
-	"os"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/cheahjs/hyperbolic-openai-proxy/internal/api"
 	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
