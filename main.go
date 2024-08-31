@@ -12,13 +12,10 @@ import (
 )
 
 var (
-	baseURL        string
-	maxStoreSizeMB int
-	baseURL        string
-	maxStoreSizeMB int
 )
 
 func main() {
+	api.Start()
 	// Resolve environment variables at startup
 	expiryDuration := 30 * time.Minute // Default expiry time
 	if expiryStr := os.Getenv("IMAGE_EXPIRY"); expiryStr != "" {
