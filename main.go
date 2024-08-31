@@ -240,7 +240,6 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	jsonBody, err = json.Marshal(openAIResponse)
 	if err != nil {
 		log.Println(err)
