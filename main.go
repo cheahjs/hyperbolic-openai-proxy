@@ -3,11 +3,11 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -121,13 +121,14 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	var port int
-	flag.IntVar(&port, "port", 8080, "port to listen on")
-	flag.Parse()
+	listenAddr := os.Getenv("LISTEN_ADDR")
+	if listenAddr == "" {
+		listenAddr = ":8080"
+	}
 
 	router := mux.NewRouter()
 	router.HandleFunc("/image/generation", imageGenerationHandler).Methods("POST")
 
-	fmt.Printf("Server is running on port %d\n", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), router))
+	fmt.Printf("Server is running on %s\n", listenAddr)
+	log.Fatal(http.ListenAndServe(listenAddr, router))
 }
