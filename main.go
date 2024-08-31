@@ -7,12 +7,18 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cheahjs/hyperbolic-openai-proxy/internal/api"
+	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
+var (
+	baseURL        string
+	maxStoreSizeMB int
+)
+
 func main() {
-	api.Start()
 	// Resolve environment variables at startup
 	expiryDuration := 30 * time.Minute // Default expiry time
 	if expiryStr := os.Getenv("IMAGE_EXPIRY"); expiryStr != "" {
