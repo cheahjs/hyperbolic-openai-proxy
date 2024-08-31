@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
 	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
 	"github.com/gorilla/mux"
-	"time"
 )
 
 type Router struct {
