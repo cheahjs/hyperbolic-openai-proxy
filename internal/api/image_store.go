@@ -1,15 +1,15 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	_ "image/jpeg"
+	"image/png"
 	_ "image/png"
-	"bytes"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"image/png"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
