@@ -36,4 +36,3 @@ func (router *Router) imageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "image/png")
 	w.Write(decodedImage)
 }
-

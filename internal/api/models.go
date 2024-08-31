@@ -30,4 +30,3 @@ type HyperbolicImage struct {
 	Image      string `json:"image"`
 	RandomSeed int64  `json:"random_seed"`
 }
-

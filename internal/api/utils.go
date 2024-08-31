@@ -16,7 +16,7 @@ func convertRequest(req *OpenAIRequest) (*HyperbolicRequest, error) {
 	hyperbolicReq.Prompt = req.Prompt
 
 	if req.Size != nil {
-		var sizeSplit = strings.Split(*req.Size, "x")
+		sizeSplit := strings.Split(*req.Size, "x")
 		if len(sizeSplit) != 2 {
 			return nil, fmt.Errorf("invalid size: %s", *req.Size)
 		}

@@ -8,8 +8,10 @@ import (
 	"time"
 )
 
-var ErrImageNotFound = errors.New("image not found")
-var ErrImageExpired = errors.New("image expired")
+var (
+	ErrImageNotFound = errors.New("image not found")
+	ErrImageExpired  = errors.New("image expired")
+)
 
 type ImageCache struct {
 	store          map[string]imageEntry
