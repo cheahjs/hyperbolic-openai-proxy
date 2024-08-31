@@ -31,6 +31,19 @@ type HyperbolicRequest struct {
 	Backend   string `json:"backend"`
 }
 
+// HyperbolicResponse represents a Hyperbolic API response
+type HyperbolicResponse struct {
+	Images        []HyperbolicImage `json:"images"`
+	InferenceTime float64           `json:"inference_time"`
+}
+
+// HyperbolicImage represents a generated image in the Hyperbolic API response
+type HyperbolicImage struct {
+	Index      int    `json:"index"`
+	Image      string `json:"image"`
+	RandomSeed int64  `json:"random_seed"`
+}
+
 func convertRequest(openAIRequest OpenAIRequest) HyperbolicRequest {
 	var hyperbolicRequest HyperbolicRequest
 
@@ -117,7 +130,22 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write(body)
+	var hyperbolicResponse HyperbolicResponse
+	err = json.Unmarshal(body, &hyperbolicResponse)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	jsonBody, err = json.Marshal(hyperbolicResponse)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonBody)
 }
 
 func main() {
