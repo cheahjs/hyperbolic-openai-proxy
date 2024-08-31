@@ -58,6 +58,7 @@ type imageEntry struct {
 var imageStore = make(map[string]imageEntry)
 
 var expiryDuration time.Duration
+var baseURL string
 var maxStoreSizeMB int
 
 // OpenAIResponse represents an OpenAI API response
@@ -159,6 +160,13 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(decodedImage)
 }
 
+func getBaseUrl(r *http.Request) string {
+	if baseURL != "" {
+		return baseURL
+	}
+	return "http://" + r.Host
+}
+
 func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 	var openAIRequest OpenAIRequest
 
@@ -228,12 +236,7 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	baseURL := os.Getenv("BASE_URL")
-	if baseURL == "" {
-		baseURL = "http://" + r.Host
-	}
-
-	openAIResponse, err := convertResponse(hyperbolicResponse, openAIRequest, baseURL)
+	openAIResponse, err := convertResponse(hyperbolicResponse, openAIRequest, getBaseUrl(r))
 	if err != nil {
 		log.Println("Error converting response:", err)
 		http.Error(w, "Failed to convert response", http.StatusInternalServerError)
@@ -256,6 +259,11 @@ func main() {
 	expiryDuration = 30 * time.Minute // Default expiry time
 	if expiryStr := os.Getenv("IMAGE_EXPIRY"); expiryStr != "" {
 		expiryDuration, _ = time.ParseDuration(expiryStr)
+	}
+
+	baseURL = os.Getenv("BASE_URL")
+	if baseURL != "" && !strings.HasPrefix(baseURL, "http") {
+		baseURL = "http://" + baseURL
 	}
 
 	maxStoreSizeMB = 0
