@@ -47,7 +47,13 @@ type HyperbolicImage struct {
 	RandomSeed int64  `json:"random_seed"`
 }
 
-var imageStore = make(map[string][]byte)
+// imageEntry stores image data and its expiration time
+type imageEntry struct {
+	data      []byte
+	expiresAt time.Time
+}
+
+var imageStore = make(map[string]imageEntry)
 
 // OpenAIResponse represents an OpenAI API response
 type OpenAIResponse struct {
@@ -105,7 +111,13 @@ func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAI
 		var openAIImage OpenAIImage
 		if openAIRequest.ResponseFormat != nil && *openAIRequest.ResponseFormat == "url" {
 			id := generateUniqueID()
-			imageStore[id] = []byte(image.Image)
+			expiryMinutes := 30 // Default expiry time
+			if expiryStr := os.Getenv("IMAGE_EXPIRY_MINUTES"); expiryStr != "" {
+				expiryMinutes, _ = strconv.Atoi(expiryStr)
+			}
+			expiresAt := time.Now().Add(time.Duration(expiryMinutes) * time.Minute)
+
+			imageStore[id] = imageEntry{ []byte(image.Image), expiresAt: expiresAt}
 			openAIImage.URL = fmt.Sprintf("%s/images/%s", baseURL, id)
 		} else {
 			openAIImage.B64JSON = image.Image
@@ -120,13 +132,19 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	imageData, ok := imageStore[id]
+	entry, ok := imageStore[id]
 	if !ok {
 		http.Error(w, "Image not found", http.StatusNotFound)
 		return
 	}
 
-	decodedImage, err := base64.StdEncoding.DecodeString(string(imageData))
+	if time.Now().After(entry.expiresAt) {
+		delete(imageStore, id)
+		http.Error(w, "Image expired", http.StatusGone)
+		return
+	}
+
+	decodedImage, err := base64.StdEncoding.DecodeString(string(entry.data))
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "Failed to decode image", http.StatusInternalServerError)
@@ -228,9 +246,38 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/image/generation", imageGenerationHandler).Methods("POST")
 	r.HandleFunc("/images/{id}", imageHandler).Methods("GET")
+
+	// Start a goroutine to clean up expired images
+	go func() {
+		for {
+			time.Sleep(time.Minute)
+			cleanupImageStore()
+		}
+	}()
+
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
 func generateUniqueID() string {
 	return strconv.FormatInt(time.Now().UnixNano(), 10)
+}
+
+func cleanupImageStore() {
+	now := time.Now()
+	maxStoreSizeMB := 0
+	if maxStoreSizeStr := os.Getenv("MAX_IMAGE_STORE_SIZE_MB"); maxStoreSizeStr != "" {
+		maxStoreSizeMB, _ = strconv.Atoi(maxStoreSizeStr)
+	}
+
+	totalSizeMB := 0
+	for id, entry := range imageStore {
+		if now.After(entry.expiresAt) {
+			delete(imageStore, id)
+		} else if maxStoreSizeMB > 0 {
+			totalSizeMB += len(entry.data) / (1024 * 1024)
+			if totalSizeMB > maxStoreSizeMB {
+				delete(imageStore, id)
+			}
+		}
+	}
 }
