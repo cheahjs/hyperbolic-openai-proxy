@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -95,7 +96,7 @@ func convertRequest(openAIRequest OpenAIRequest) HyperbolicRequest {
 	return hyperbolicRequest
 }
 
-func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAIRequest) OpenAIResponse {
+func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAIRequest, baseURL string) OpenAIResponse {
 	var openAIResponse OpenAIResponse
 
 	openAIResponse.Created = time.Now().Unix()
@@ -105,7 +106,7 @@ func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAI
 		if openAIRequest.ResponseFormat != nil && *openAIRequest.ResponseFormat == "url" {
 			id := generateUniqueID()
 			imageStore[id] = []byte(image.Image)
-			openAIImage.URL = fmt.Sprintf("http://localhost:8080/images/%s", id)
+			openAIImage.URL = fmt.Sprintf("%s/images/%s", baseURL, id)
 		} else {
 			openAIImage.B64JSON = image.Image
 		}
@@ -205,7 +206,12 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	openAIResponse := convertResponse(hyperbolicResponse, openAIRequest)
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		baseURL = "http://" + r.Host
+	}
+
+	openAIResponse := convertResponse(hyperbolicResponse, openAIRequest, baseURL)
 
 	jsonBody, err = json.Marshal(openAIResponse)
 	if err != nil {
