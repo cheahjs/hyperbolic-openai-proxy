@@ -206,8 +206,10 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Pass through headers from the original request
-	for key, values := range r.Header {
-		req.Header[key] = values
+	for key, value := range r.Header {
+		if key != "Host" {
+			req.Header.Set(key, value[0])
+		}
 	}
 
 	client := &http.Client{}
