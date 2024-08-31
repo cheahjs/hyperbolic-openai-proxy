@@ -14,10 +14,10 @@ var (
 )
 
 type ImageCache struct {
-	store          map[string]imageEntry
-	expiryDuration time.Duration
-	maxStoreSizeMB int
-	mu             sync.Mutex
+	store           map[string]imageEntry
+	expiryDuration  time.Duration
+	maxStoreSizeMB  int
+	mu              sync.Mutex
 	cleanupInterval time.Duration
 }
 
@@ -28,9 +28,9 @@ type imageEntry struct {
 
 func NewImageCache(expiryDuration time.Duration, maxStoreSizeMB int, cleanupInterval time.Duration) *ImageCache {
 	c := &ImageCache{
-		store:          make(map[string]imageEntry),
-		expiryDuration: expiryDuration,
-		maxStoreSizeMB: maxStoreSizeMB,
+		store:           make(map[string]imageEntry),
+		expiryDuration:  expiryDuration,
+		maxStoreSizeMB:  maxStoreSizeMB,
 		cleanupInterval: cleanupInterval,
 	}
 
