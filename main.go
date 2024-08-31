@@ -34,7 +34,7 @@ func main() {
 		baseURL = scheme + "://" + baseURL
 	}
 
-	maxStoreSizeMB = 0
+	maxStoreSizeMB = 50
 	if maxStoreSizeStr := os.Getenv("MAX_IMAGE_STORE_SIZE_MB"); maxStoreSizeStr != "" {
 		maxStoreSizeMB, _ = strconv.Atoi(maxStoreSizeStr)
 	}
