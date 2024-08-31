@@ -11,9 +11,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var (
-)
-
 func main() {
 	api.Start()
 	// Resolve environment variables at startup
