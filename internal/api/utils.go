@@ -10,38 +10,35 @@ import (
 	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
 )
 
-func convertRequest(openAIRequest OpenAIRequest) HyperbolicRequest {
-	var hyperbolicRequest HyperbolicRequest
+func convertRequest(req *OpenAIRequest) (*HyperbolicRequest, error) {
+	var hyperbolicReq HyperbolicRequest
 
-	hyperbolicRequest.ModelName = openAIRequest.Model
-	hyperbolicRequest.Prompt = openAIRequest.Prompt
+	hyperbolicReq.ModelName = req.Model
+	hyperbolicReq.Prompt = req.Prompt
 
-	if openAIRequest.Size != nil {
-		var sizeSplit = strings.Split(*openAIRequest.Size, "x")
+	if req.Size != nil {
+		var sizeSplit = strings.Split(*req.Size, "x")
 		if len(sizeSplit) != 2 {
-			log.Println("Invalid size")
-			return hyperbolicRequest
+			return nil, fmt.Errorf("invalid size: %s", *req.Size)
 		}
 		height, err := strconv.Atoi(sizeSplit[0])
 		if err != nil {
-			log.Println(err)
-			return hyperbolicRequest
+			return nil, fmt.Errorf("invalid height: %s", sizeSplit[0])
 		}
 		width, err := strconv.Atoi(sizeSplit[1])
 		if err != nil {
-			log.Println(err)
-			return hyperbolicRequest
+			return nil, fmt.Errorf("invalid width: %s", sizeSplit[1])
 		}
-		hyperbolicRequest.Height = height
-		hyperbolicRequest.Width = width
+		hyperbolicReq.Height = height
+		hyperbolicReq.Width = width
 	} else {
-		hyperbolicRequest.Height = 1024
-		hyperbolicRequest.Width = 1024
+		hyperbolicReq.Height = 1024
+		hyperbolicReq.Width = 1024
 	}
 
-	hyperbolicRequest.Backend = "auto"
+	hyperbolicReq.Backend = "auto"
 
-	return hyperbolicRequest
+	return &hyperbolicReq, nil
 }
 
 func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAIRequest, baseURL string, imageCache *cache.ImageCache) (OpenAIResponse, error) {
@@ -65,4 +62,3 @@ func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAI
 
 	return openAIResponse, nil
 }
-
