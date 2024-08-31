@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"math/rand"
+	"encoding/hex"
 	"os"
 	"strconv"
 	"strings"
@@ -271,7 +273,13 @@ func main() {
 }
 
 func generateUniqueID() string {
-	return strconv.FormatInt(time.Now().UnixNano(), 10)
+	bytes := make([]byte, 16)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		log.Println("Error generating random ID:", err)
+		return strconv.FormatInt(time.Now().UnixNano(), 10) // Fallback to timestamp-based ID
+	}
+	return hex.EncodeToString(bytes)
 }
 
 func cleanupImageStore() {
