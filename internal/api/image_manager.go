@@ -10,7 +10,6 @@ import (
 	_ "image/jpeg"
 	"image/png"
 	_ "image/png"
-	"io"
 	"os"
 	"path/filepath"
 	"sync"
