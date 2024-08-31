@@ -55,6 +55,9 @@ type imageEntry struct {
 
 var imageStore = make(map[string]imageEntry)
 
+var expiryDuration time.Duration
+var maxStoreSizeMB int
+
 // OpenAIResponse represents an OpenAI API response
 type OpenAIResponse struct {
 	Created int64         `json:"created"`
@@ -111,10 +114,7 @@ func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAI
 		var openAIImage OpenAIImage
 		if openAIRequest.ResponseFormat != nil && *openAIRequest.ResponseFormat == "url" {
 			id := generateUniqueID()
-			expiryDuration := 30 * time.Minute // Default expiry time
-			if expiryStr := os.Getenv("IMAGE_EXPIRY"); expiryStr != "" {
-				expiryDuration, _ = time.ParseDuration(expiryStr)
-			}
+
 			expiresAt := time.Now().Add(expiryDuration)
 
 			imageStore[id] = imageEntry{[]byte(image.Image), expiresAt}
@@ -244,6 +244,17 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// Resolve environment variables at startup
+	expiryDuration = 30 * time.Minute // Default expiry time
+	if expiryStr := os.Getenv("IMAGE_EXPIRY"); expiryStr != "" {
+		expiryDuration, _ = time.ParseDuration(expiryStr)
+	}
+
+	maxStoreSizeMB = 0
+	if maxStoreSizeStr := os.Getenv("MAX_IMAGE_STORE_SIZE_MB"); maxStoreSizeStr != "" {
+		maxStoreSizeMB, _ = strconv.Atoi(maxStoreSizeStr)
+	}
+
 	r := mux.NewRouter()
 	r.HandleFunc("/image/generation", imageGenerationHandler).Methods("POST")
 	r.HandleFunc("/images/{id}", imageHandler).Methods("GET")
@@ -265,11 +276,6 @@ func generateUniqueID() string {
 
 func cleanupImageStore() {
 	now := time.Now()
-	maxStoreSizeMB := 0
-	if maxStoreSizeStr := os.Getenv("MAX_IMAGE_STORE_SIZE_MB"); maxStoreSizeStr != "" {
-		maxStoreSizeMB, _ = strconv.Atoi(maxStoreSizeStr)
-	}
-
 	totalSizeMB := 0
 	for id, entry := range imageStore {
 		if now.After(entry.expiresAt) {
