@@ -283,7 +283,10 @@ func main() {
 		}
 	}()
 
-	log.Fatal(http.ListenAndServe(":8080", r))
+	err := http.ListenAndServe(":8080", r)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func generateUniqueID() (string, error) {
