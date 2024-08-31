@@ -103,30 +103,30 @@ func convertRequest(openAIRequest OpenAIRequest) HyperbolicRequest {
 }
 
 func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAIRequest, baseURL string) OpenAIResponse {
-    var openAIResponse OpenAIResponse
+	var openAIResponse OpenAIResponse
 
-    openAIResponse.Created = time.Now().Unix()
+	openAIResponse.Created = time.Now().Unix()
 
-    for _, image := range hyperbolicResponse.Images {
-        var openAIImage OpenAIImage
-        if openAIRequest.ResponseFormat != nil && *openAIRequest.ResponseFormat == "url" {
-            id := generateUniqueID()
-            expiryDuration := 30 * time.Minute // Default expiry time
-            if expiryStr := os.Getenv("IMAGE_EXPIRY"); expiryStr != "" {
-                expiryDuration, _ = time.ParseDuration(expiryStr)
-            }
-            expiresAt := time.Now().Add(expiryDuration)
+	for _, image := range hyperbolicResponse.Images {
+		var openAIImage OpenAIImage
+		if openAIRequest.ResponseFormat != nil && *openAIRequest.ResponseFormat == "url" {
+			id := generateUniqueID()
+			expiryDuration := 30 * time.Minute // Default expiry time
+			if expiryStr := os.Getenv("IMAGE_EXPIRY"); expiryStr != "" {
+				expiryDuration, _ = time.ParseDuration(expiryStr)
+			}
+			expiresAt := time.Now().Add(expiryDuration)
 
-            imageStore[id] = imageEntry{[]byte(image.Image), expiresAt}
-            openAIImage.URL = fmt.Sprintf("%s/images/%s", baseURL, id)
+			imageStore[id] = imageEntry{[]byte(image.Image), expiresAt}
+			openAIImage.URL = fmt.Sprintf("%s/images/%s", baseURL, id)
 
-        } else {
-            openAIImage.B64JSON = image.Image
-        }
-        openAIResponse.Data = append(openAIResponse.Data, openAIImage)
-    }
+		} else {
+			openAIImage.B64JSON = image.Image
+		}
+		openAIResponse.Data = append(openAIResponse.Data, openAIImage)
+	}
 
-    return openAIResponse
+	return openAIResponse
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request) {
