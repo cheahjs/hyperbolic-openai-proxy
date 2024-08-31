@@ -1,5 +1,14 @@
 package api
 
+import (
+	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
+)
+
 type OpenAIImage struct {
 	URL      string `json:"url,omitempty"`
 	B64JSON string `json:"b64_json,omitempty"`
@@ -9,15 +18,6 @@ type OpenAIResponse struct {
 	Created int64          `json:"created"`
 	Data    []OpenAIImage `json:"data"`
 }
-
-import (
-	"fmt"
-	"strconv"
-	"strings"
-	"time"
-
-	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
-)
 
 func convertRequest(req *OpenAIRequest) (*HyperbolicRequest, error) {
 	var hyperbolicReq HyperbolicRequest
