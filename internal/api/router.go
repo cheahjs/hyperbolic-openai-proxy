@@ -14,9 +14,9 @@ import (
 )
 
 type Router struct {
-	router     *mux.Router
+	router       *mux.Router
 	imageManager *ImageManager
-	baseURL    string
+	baseURL      string
 }
 
 func NewRouter(imageManager *ImageManager, baseURL string) *Router {
