@@ -116,6 +116,11 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if openAIRequest.N != 0 && openAIRequest.N != 1 {
+		http.Error(w, "n must be 1", http.StatusBadRequest)
+		return
+	}
+
 	hyperbolicRequest := convertRequest(openAIRequest)
 
 	jsonBody, err := json.Marshal(hyperbolicRequest)
@@ -135,56 +140,4 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 	// Pass through headers from the original request
 	for key, value := range r.Header {
 		if key != "Host" {
-			req.Header.Set(key, value[0])
-		}
-	}
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	defer resp.Body.Close()
-
-	body, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	var hyperbolicResponse HyperbolicResponse
-	err = json.Unmarshal(body, &hyperbolicResponse)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	openAIResponse := convertResponse(hyperbolicResponse)
-
-	jsonBody, err = json.Marshal(openAIResponse)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(jsonBody)
-}
-
-func main() {
-	listenAddr := os.Getenv("LISTEN_ADDR")
-	if listenAddr == "" {
-		listenAddr = ":8080"
-	}
-
-	router := mux.NewRouter()
-	router.HandleFunc("/image/generation", imageGenerationHandler).Methods("POST")
-
-	fmt.Printf("Server is running on %s\n", listenAddr)
-	log.Fatal(http.ListenAndServe(listenAddr, router))
-}
+			req.Header.Set(key, value[value[value[value
