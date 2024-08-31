@@ -53,7 +53,10 @@ func main() {
 		zerolog.SetGlobalLevel(level)
 	}
 
-	imageCache := cache.NewImageCache(expiryDuration, maxStoreSizeMB, time.Minute)
+	var imageCache *cache.ImageCache
+	if os.Getenv("IMAGES_SAVE_PATH") == "" {
+		imageCache = cache.NewImageCache(expiryDuration, maxStoreSizeMB, time.Minute)
+	}
 
 	imageStore, err := api.NewImageStore(os.Getenv("IMAGES_SAVE_PATH"))
 	if err != nil {
