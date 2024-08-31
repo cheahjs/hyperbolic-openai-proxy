@@ -17,10 +17,6 @@ var (
 	maxStoreSizeMB int
 )
 
-func cleanupImageStore() {
-	// TODO: Implement image store cleanup logic
-}
-
 func main() {
 	// Resolve environment variables at startup
 	expiryDuration := 30 * time.Minute // Default expiry time
