@@ -16,14 +16,16 @@ import (
 type Router struct {
 	router     *mux.Router
 	imageCache *cache.ImageCache
+	imageStore *ImageStore
 	baseURL    string
 }
 
-func NewRouter(imageCache *cache.ImageCache, baseURL string) *Router {
+func NewRouter(imageCache *cache.ImageCache, imageStore *ImageStore, baseURL string) *Router {
 	r := mux.NewRouter()
 	router := &Router{
 		router:     r,
 		imageCache: imageCache,
+		imageStore: imageStore,
 		baseURL:    baseURL,
 	}
 

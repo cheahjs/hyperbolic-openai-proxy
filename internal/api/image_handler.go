@@ -14,6 +14,12 @@ func (router *Router) imageHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
+	if router.imageStore != nil {
+		filePath := router.imageStore.GetImagePath(id)
+		http.ServeFile(w, r, filePath)
+		return
+	}
+
 	imageData, err := router.imageCache.GetImage(id)
 	if err == cache.ErrImageNotFound {
 		log.Error().Err(err).Str("id", id).Msg("Image not found")

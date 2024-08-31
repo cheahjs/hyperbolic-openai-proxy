@@ -66,6 +66,24 @@ func (c *ImageCache) StoreImage(data []byte) (string, error) {
 	return id, nil
 }
 
+func (c *ImageCache) StoreImageWithPrompt(prompt string, data []byte) (string, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	id, err := generateUniqueID()
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to generate unique ID")
+		return "", err
+	}
+
+	expiresAt := time.Now().Add(c.expiryDuration)
+	c.store[id] = imageEntry{data, expiresAt}
+
+	log.Info().Str("id", id).Msg("Stored image in cache")
+
+	return id, nil
+}
+
 func generateUniqueID() (string, error) {
 	b := make([]byte, 16)
 	_, err := rand.Read(b)

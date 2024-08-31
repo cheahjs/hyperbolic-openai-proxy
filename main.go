@@ -55,7 +55,12 @@ func main() {
 
 	imageCache := cache.NewImageCache(expiryDuration, maxStoreSizeMB, time.Minute)
 
-	router := api.NewRouter(imageCache, baseURL)
+	imageStore, err := NewImageStore(os.Getenv("IMAGES_SAVE_PATH"))
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize image store")
+	}
+
+	router := api.NewRouter(imageCache, imageStore, baseURL)
 
 	listenAddr := ":8080"
 	if envListenAddr := os.Getenv("LISTEN_ADDR"); envListenAddr != "" {
