@@ -8,7 +8,6 @@ var (
 func cleanupImageStore() {
 	// TODO: Implement image store cleanup logic
 }
-
 import (
 	"log"
 	"net/http"
