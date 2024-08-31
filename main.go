@@ -1,9 +1,4 @@
 package main
-
-var (
-	baseURL         string
-	maxStoreSizeMB int
-)
 import (
 	"log"
 	"net/http"
@@ -17,6 +12,9 @@ import (
 )
 
 var (
+	baseURL         string
+	maxStoreSizeMB int
+)
 	baseURL         string
 	maxStoreSizeMB int
 )
