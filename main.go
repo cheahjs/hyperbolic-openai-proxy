@@ -42,7 +42,6 @@ func main() {
 
 	router := api.NewRouter(imageCache, baseURL)
 
-
 	listenAddr := ":8080"
 	if envListenAddr := os.Getenv("LISTEN_ADDR"); envListenAddr != "" {
 		listenAddr = envListenAddr
