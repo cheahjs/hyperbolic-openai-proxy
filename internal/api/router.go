@@ -29,7 +29,27 @@ func NewRouter(imageCache *cache.ImageCache, baseURL string) *Router {
 	r.HandleFunc("/image/generation", router.imageGenerationHandler).Methods("POST")
 	r.HandleFunc("/images/{id}", router.imageHandler).Methods("GET")
 
+	r.Use(loggingMiddleware)
+
 	return router
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		log.Info().
+			Str("method", r.Method).
+			Str("path", r.URL.Path).
+			Msg("Request started")
+
+		next.ServeHTTP(w, r)
+
+		log.Info().
+			Str("method", r.Method).
+			Str("path", r.URL.Path).
+			Dur("duration", time.Since(start)).
+			Msg("Request completed")
+	})
 }
 
 func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
