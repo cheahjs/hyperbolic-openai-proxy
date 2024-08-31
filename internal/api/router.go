@@ -129,6 +129,13 @@ func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Requ
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		body, _ := ioutil.ReadAll(resp.Body)
+		log.Error().Err(err).Str("status", resp.Status).Str("body", string(body)).Msg("Failed to send request")
+		http.Error(w, "Failed to generate image", resp.StatusCode)
+		return
+	}
+
 	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to read response body")
