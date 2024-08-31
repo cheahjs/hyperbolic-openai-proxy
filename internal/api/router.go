@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
 
 	"github.com/rs/zerolog/log"
-	"net/http"
 
 	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
 	"github.com/gorilla/mux"
