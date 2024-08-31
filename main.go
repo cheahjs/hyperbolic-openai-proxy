@@ -55,7 +55,7 @@ func main() {
 
 	imageCache := cache.NewImageCache(expiryDuration, maxStoreSizeMB, time.Minute)
 
-	imageStore, err := NewImageStore(os.Getenv("IMAGES_SAVE_PATH"))
+	imageStore, err := api.NewImageStore(os.Getenv("IMAGES_SAVE_PATH"))
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize image store")
 	}
@@ -74,7 +74,7 @@ func main() {
 		Int("maxStoreSizeMB", maxStoreSizeMB).
 		Msg("Starting server")
 
-	err := http.ListenAndServe(listenAddr, router)
+	err = http.ListenAndServe(listenAddr, router)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to start server")
 	}
