@@ -1,5 +1,14 @@
 package main
 
+var (
+	baseURL         string
+	maxStoreSizeMB int
+)
+
+func cleanupImageStore() {
+	// TODO: Implement image store cleanup logic
+}
+
 import (
 	"log"
 	"net/http"
