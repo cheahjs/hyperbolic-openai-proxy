@@ -9,7 +9,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
 	"github.com/gorilla/mux"
 )
 
