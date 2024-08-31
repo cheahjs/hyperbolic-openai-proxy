@@ -151,7 +151,7 @@ func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	openAIResponse, err := convertResponse(hyperbolicResponse, openAIRequest, router.getBaseUrl(r), router.imageCache, router.imageStore)
+	openAIResponse, err := convertResponse(hyperbolicResponse, openAIRequest, router.getBaseUrl(r), router.imageManager)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to convert response")
 		http.Error(w, "Failed to convert response", http.StatusInternalServerError)
