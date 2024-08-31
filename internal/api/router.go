@@ -42,82 +42,86 @@ func (router *Router) getBaseUrl(r *http.Request) string {
 	return "http://" + r.Host
 }
 
-func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
-	var openAIRequest OpenAIRequest
+func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Request) { 
+    var openAIRequest OpenAIRequest
 
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+    body, err := ioutil.ReadAll(r.Body)
+    if err != nil {
+        log.Println(err)
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
 
-	err = json.Unmarshal(body, &openAIRequest)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+    err = json.Unmarshal(body, &openAIRequest)
+    if err != nil {
+        log.Println(err)
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
 
-	if openAIRequest.N != nil && *openAIRequest.N != 1 {
-		http.Error(w, "n must be 1", http.StatusBadRequest)
-		return
-	}
+    if openAIRequest.N != nil && *openAIRequest.N != 1 {
+        http.Error(w, "n must be 1", http.StatusBadRequest)
+        return
+    }
 
-	hyperbolicRequest, err := convertRequest(&openAIRequest)
-	if err != nil {
+    hyperbolicRequest, err := convertRequest(&openAIRequest)
+    if err != nil {
+        log.Println(err)
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
 
-	jsonBody, err := json.Marshal(hyperbolicRequest)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+    jsonBody, err := json.Marshal(hyperbolicRequest)
+    if err != nil {
+        log.Println(err)
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 
-	req, err := http.NewRequest("POST", "https://api.hyperbolic.xyz/v1/image/generation", bytes.NewBuffer(jsonBody))
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+    req, err := http.NewRequest("POST", "https://api.hyperbolic.xyz/v1/image/generation", bytes.NewBuffer(jsonBody))
+    if err != nil {
+        log.Println(err)
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 
-	// Pass through headers from the original request
-	for key, value := range r.Header {
-		if key != "Host" {
-			req.Header[key] = value
-		}
-	}
+    // Pass through headers from the original request
+    for key, value := range r.Header {
+        if key != "Host" {
+            req.Header[key] = value
+        }
+    }
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer resp.Body.Close()
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        log.Println(err)
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer resp.Body.Close()
 
-	body, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+    body, err = ioutil.ReadAll(resp.Body)
+    if err != nil {
+        log.Println(err)
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 
-	var hyperbolicResponse HyperbolicResponse
-	err = json.Unmarshal(body, &hyperbolicResponse)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+    var hyperbolicResponse HyperbolicResponse
+    err = json.Unmarshal(body, &hyperbolicResponse)
+    if err != nil {
+        log.Println(err)
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 
-	openAIResponse, err := convertResponse(hyperbolicResponse, openAIRequest, router.getBaseUrl(r), router.imageCache)
-	if err != nil {
-		log.Println("Error converting response:", err)
-		http.Error(w, "Failed to convert response", http.StatusInternalServerError)
-		return
-	}
+    openAIResponse, err := convertResponse(hyperbolicResponse, openAIRequest, router.getBaseUrl(r), router.imageCache)
+    if err != nil {
+        log.Println("Error converting response:", err)
+        http.Error(w, "Failed to convert response", http.StatusInternalServerError)
+        return
+    }
 
-	respondWithJSON(w, openAIResponse)
+    respondWithJSON(w, openAIResponse)
 }
