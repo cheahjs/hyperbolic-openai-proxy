@@ -3,7 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -66,7 +66,7 @@ func (router *Router) getBaseUrl(r *http.Request) string {
 func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 	var openAIRequest OpenAIRequest
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to read request body")
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -129,13 +129,13 @@ func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Requ
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 		log.Error().Err(err).Str("status", resp.Status).Str("body", string(body)).Msg("Failed to send request")
 		http.Error(w, "Failed to generate image", resp.StatusCode)
 		return
 	}
 
-	body, err = ioutil.ReadAll(resp.Body)
+	body, err = io.ReadAll(resp.Body)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to read response body")
 		http.Error(w, err.Error(), http.StatusInternalServerError)

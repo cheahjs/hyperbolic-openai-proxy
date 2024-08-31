@@ -10,7 +10,8 @@ import (
 	_ "image/jpeg"
 	"image/png"
 	_ "image/png"
-	"io/ioutil"
+	"io"
+	"os"
 	"os"
 	"path/filepath"
 	"sync"
@@ -89,7 +90,13 @@ func (manager *ImageManager) StoreImageWithPrompt(prompt string, imageData []byt
 		}
 
 		promptPath := filepath.Join(manager.basePath, id+".txt")
-		if err := ioutil.WriteFile(promptPath, []byte(prompt), 0o644); err != nil {
+		promptFile, err := os.Create(promptPath)
+		if err != nil {
+			return "", fmt.Errorf("failed to create prompt file: %w", err)
+		}
+		defer promptFile.Close()
+
+		if _, err := promptFile.Write([]byte(prompt)); err != nil {
 			return "", fmt.Errorf("failed to write prompt file: %w", err)
 		}
 
@@ -121,7 +128,7 @@ func (manager *ImageManager) GetImage(id string) ([]byte, error) {
 		}
 
 		if len(matches) > 0 {
-			imageData, err := ioutil.ReadFile(matches[0])
+			imageData, err := os.ReadFile(matches[0])
 			if err != nil {
 				log.Error().Err(err).Str("id", id).Msg("Failed to read image file")
 				return nil, fmt.Errorf("failed to read image file: %w", err)
