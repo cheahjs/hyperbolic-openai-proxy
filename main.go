@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -57,7 +56,9 @@ type OpenAIResponse struct {
 
 // OpenAIImage represents a generated image in the OpenAI API response
 type OpenAIImage struct {
-	B64JSON string `json:"b64_json"`
+	B64JSON      string `json:"b64_json,omitempty"`
+	URL          string `json:"url,omitempty"`
+	RevisedPrompt string `json:"revised_prompt,omitempty"`
 }
 
 func convertRequest(openAIRequest OpenAIRequest) HyperbolicRequest {
@@ -94,7 +95,7 @@ func convertRequest(openAIRequest OpenAIRequest) HyperbolicRequest {
 	return hyperbolicRequest
 }
 
-func convertResponse(hyperbolicResponse HyperbolicResponse) OpenAIResponse {
+func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAIRequest) OpenAIResponse {
 	var openAIResponse OpenAIResponse
 
 	openAIResponse.Created = time.Now().Unix()
@@ -104,7 +105,7 @@ func convertResponse(hyperbolicResponse HyperbolicResponse) OpenAIResponse {
 		if openAIRequest.ResponseFormat != nil && *openAIRequest.ResponseFormat == "url" {
 			id := generateUniqueID()
 			imageStore[id] = []byte(image.Image)
-			openAIImage.B64JSON = fmt.Sprintf("http://localhost:8080/images/%s", id)
+			openAIImage.URL = fmt.Sprintf("http://localhost:8080/images/%s", id)
 		} else {
 			openAIImage.B64JSON = image.Image
 		}
@@ -152,7 +153,7 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if openAIRequest.N != 0 && openAIRequest.N != 1 {
+	if openAIRequest.N != nil && *openAIRequest.N != 1 {
 		http.Error(w, "n must be 1", http.StatusBadRequest)
 		return
 	}
@@ -204,7 +205,7 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	openAIResponse := convertResponse(hyperbolicResponse)
+	openAIResponse := convertResponse(hyperbolicResponse, openAIRequest)
 
 	jsonBody, err = json.Marshal(openAIResponse)
 	if err != nil {
