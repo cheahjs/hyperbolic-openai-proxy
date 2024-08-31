@@ -57,14 +57,15 @@ func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAI
 
 	for _, image := range hyperbolicResponse.Images {
 		var openAIImage OpenAIImage
+
+		filePath, err := imageStore.StoreImageWithPrompt(openAIRequest.Prompt, []byte(image.Image))
+		if err != nil {
+			return openAIResponse, fmt.Errorf("failed to store image: %w", err)
+		}
+		openAIImage.URL = filePath
+
 		if openAIRequest.ResponseFormat != nil && *openAIRequest.ResponseFormat == "b64_json" {
 			openAIImage.B64JSON = image.Image
-		} else { // default to URL or filesystem
-			filePath, err := imageStore.StoreImageWithPrompt(openAIRequest.Prompt, []byte(image.Image))
-			if err != nil {
-				return openAIResponse, fmt.Errorf("failed to store image: %w", err)
-			}
-			openAIImage.URL = filePath
 		}
 		openAIResponse.Data = append(openAIResponse.Data, openAIImage)
 	}
