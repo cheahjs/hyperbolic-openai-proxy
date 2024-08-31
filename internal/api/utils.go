@@ -67,16 +67,19 @@ func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAI
 				}
 				openAIImage.URL = filePath
 			} else {
-				id, err := router.imageCache.StoreImage([]byte(image.Image))
+			if imageStore != nil {
+				filePath, err := imageStore.StoreImageWithPrompt(openAIRequest.Prompt, []byte(image.Image))
 				if err != nil {
 					return openAIResponse, fmt.Errorf("failed to store image: %w", err)
 				}
-				openAIImage.URL = fmt.Sprintf("%s/images/%s", router.getBaseUrl(r), id)
+				openAIImage.URL = filePath
+			} else {
+				id, err := imageCache.StoreImage([]byte(image.Image))
+				if err != nil {
+					return openAIResponse, fmt.Errorf("failed to store image: %w", err)
+				}
+				openAIImage.URL = fmt.Sprintf("%s/images/%s", baseURL, id)
 			}
-			if err != nil {
-				return openAIResponse, fmt.Errorf("failed to store image: %w", err)
-			}
-			openAIImage.URL = fmt.Sprintf("%s/images/%s", baseURL, id)
 		}
 		openAIResponse.Data = append(openAIResponse.Data, openAIImage)
 	}
