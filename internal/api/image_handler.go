@@ -14,11 +14,11 @@ func (router *Router) imageHandler(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 
 	imageData, err := router.imageManager.GetImage(id)
-	if err == cache.ErrImageNotFound {
+	if err == ErrImageNotFound {
 		log.Error().Err(err).Str("id", id).Msg("Image not found")
 		http.Error(w, "Image not found", http.StatusNotFound)
 		return
-	} else if err == cache.ErrImageExpired {
+	} else if err == ErrImageExpired {
 		log.Error().Err(err).Str("id", id).Msg("Image expired")
 		http.Error(w, "Image expired", http.StatusGone)
 		return
