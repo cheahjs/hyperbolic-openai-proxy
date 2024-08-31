@@ -35,8 +35,10 @@ func NewImageCache(expiryDuration time.Duration, maxStoreSizeMB int, cleanupInte
 	}
 
 	go func() {
-		for {
-			time.Sleep(c.cleanupInterval)
+		ticker := time.NewTicker(c.cleanupInterval)
+		defer ticker.Stop()
+
+		for range ticker.C {
 			c.cleanup()
 		}
 	}()
