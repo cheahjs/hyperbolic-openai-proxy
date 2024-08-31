@@ -5,10 +5,11 @@ import (
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
+	"bytes"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
+	"image/png"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
