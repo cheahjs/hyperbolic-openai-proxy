@@ -23,7 +23,7 @@ func NewImageStore(basePath string) (*ImageStore, error) {
 		return nil, nil // Image store is disabled
 	}
 
-	if err := os.MkdirAll(basePath, 0755); err != nil {
+	if err := os.MkdirAll(basePath, 0o755); err != nil {
 		return nil, fmt.Errorf("failed to create image store directory: %w", err)
 	}
 
@@ -49,7 +49,7 @@ func (store *ImageStore) StoreImageWithPrompt(prompt string, imageData []byte) (
 	}
 
 	promptPath := filepath.Join(store.basePath, id+".txt")
-	if err := ioutil.WriteFile(promptPath, []byte(prompt), 0644); err != nil {
+	if err := ioutil.WriteFile(promptPath, []byte(prompt), 0o644); err != nil {
 		return "", fmt.Errorf("failed to write prompt file: %w", err)
 	}
 
