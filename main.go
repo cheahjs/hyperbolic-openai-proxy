@@ -47,7 +47,7 @@ type HyperbolicImage struct {
 
 // OpenAIResponse represents an OpenAI API response
 type OpenAIResponse struct {
-	Created int64       `json:"created"`
+	Created int64         `json:"created"`
 	Data    []OpenAIImage `json:"data"`
 }
 
