@@ -80,6 +80,10 @@ func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to unmarshal request body")
 		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	if openAIRequest.Model == "" {
+		http.Error(w, "model is required", http.StatusBadRequest)
 		return
 	}
 
