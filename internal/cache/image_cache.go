@@ -59,7 +59,16 @@ func (c *ImageCache) GetImage(id string) ([]byte, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	// Implementation for retrieving image data
-	return nil, nil
+	entry, ok := c.store[id]
+	if !ok {
+		return nil, ErrImageNotFound
+	}
+
+	if time.Now().After(entry.expiresAt) {
+		delete(c.store, id)
+		return nil, ErrImageExpired
+	}
+
+	return entry.data, nil
 }
 
