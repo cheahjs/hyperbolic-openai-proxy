@@ -32,7 +32,7 @@ func NewImageCache(expiryDuration time.Duration, maxStoreSizeMB int) *ImageCache
 }
 
 func (c *ImageCache) StoreImage(data []byte) (string, error) {
-	c.mu.Lock() // Acquire lock before accessing the map
+	c.mu.Lock()         // Acquire lock before accessing the map
 	defer c.mu.Unlock() // Release lock when done
 
 	id, err := generateUniqueID()
@@ -56,7 +56,7 @@ func generateUniqueID() (string, error) {
 }
 
 func (c *ImageCache) GetImage(id string) ([]byte, error) {
-	c.mu.Lock() // Acquire lock before accessing the map
+	c.mu.Lock()         // Acquire lock before accessing the map
 	defer c.mu.Unlock() // Release lock when done
 
 	entry, ok := c.store[id]
