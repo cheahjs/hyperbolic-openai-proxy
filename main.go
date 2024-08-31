@@ -140,4 +140,49 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 	// Pass through headers from the original request
 	for key, value := range r.Header {
 		if key != "Host" {
-			req.Header.Set(key, value[value[value[value
+			req.Header.Set(key, value[0])
+		}
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var hyperbolicResponse HyperbolicResponse
+	err = json.Unmarshal(body, &hyperbolicResponse)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	openAIResponse := convertResponse(hyperbolicResponse)
+
+	jsonBody, err = json.Marshal(openAIResponse)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonBody)
+}
+
+func main() {
+	r := mux.NewRouter()
+	r.HandleFunc("/image/generation", imageGenerationHandler).Methods("POST")
+	log.Fatal(http.ListenAndServe(":8080", r))
+}
