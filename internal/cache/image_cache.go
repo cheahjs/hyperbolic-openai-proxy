@@ -4,6 +4,8 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+
+	"github.com/rs/zerolog/log"
 	"sync"
 	"time"
 )
@@ -47,16 +49,19 @@ func NewImageCache(expiryDuration time.Duration, maxStoreSizeMB int, cleanupInte
 }
 
 func (c *ImageCache) StoreImage(data []byte) (string, error) {
-	c.mu.Lock()         // Acquire lock before accessing the map
-	defer c.mu.Unlock() // Release lock when done
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	id, err := generateUniqueID()
 	if err != nil {
+		log.Error().Err(err).Msg("Failed to generate unique ID")
 		return "", err
 	}
 
 	expiresAt := time.Now().Add(c.expiryDuration)
 	c.store[id] = imageEntry{data, expiresAt}
+
+	log.Info().Str("id", id).Msg("Stored image in cache")
 
 	return id, nil
 }
@@ -71,23 +76,27 @@ func generateUniqueID() (string, error) {
 }
 
 func (c *ImageCache) GetImage(id string) ([]byte, error) {
-	c.mu.Lock()         // Acquire lock before accessing the map
-	defer c.mu.Unlock() // Release lock when done
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	entry, ok := c.store[id]
 	if !ok {
+		log.Warn().Str("id", id).Msg("Image not found in cache")
 		return nil, ErrImageNotFound
 	}
 
 	if time.Now().After(entry.expiresAt) {
+		log.Warn().Str("id", id).Msg("Image expired in cache")
 		delete(c.store, id)
 		return nil, ErrImageExpired
 	}
 
+	log.Info().Str("id", id).Msg("Retrieved image from cache")
+
 	return entry.data, nil
 }
-
 func (c *ImageCache) cleanup() {
+	log.Debug().Msg("Cleaning up image cache")
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -95,6 +104,7 @@ func (c *ImageCache) cleanup() {
 	for id, entry := range c.store {
 		if now.After(entry.expiresAt) {
 			delete(c.store, id)
+			log.Debug().Str("id", id).Msg("Removed expired image from cache")
 		}
 	}
 }

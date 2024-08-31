@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
@@ -47,14 +46,14 @@ func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Requ
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Println(err)
+		log.Error().Err(err).Msg("Failed to read request body")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	err = json.Unmarshal(body, &openAIRequest)
 	if err != nil {
-		log.Println(err)
+		log.Error().Err(err).Msg("Failed to unmarshal request body")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -66,21 +65,21 @@ func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Requ
 
 	hyperbolicRequest, err := convertRequest(&openAIRequest)
 	if err != nil {
-		log.Println(err)
+		log.Error().Err(err).Msg("Failed to convert request")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	jsonBody, err := json.Marshal(hyperbolicRequest)
 	if err != nil {
-		log.Println(err)
+		log.Error().Err(err).Msg("Failed to marshal request body")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	req, err := http.NewRequest("POST", "https://api.hyperbolic.xyz/v1/image/generation", bytes.NewBuffer(jsonBody))
 	if err != nil {
-		log.Println(err)
+		log.Error().Err(err).Msg("Failed to create request")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -95,7 +94,7 @@ func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Requ
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
+		log.Error().Err(err).Msg("Failed to send request")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -103,7 +102,7 @@ func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Requ
 
 	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println(err)
+		log.Error().Err(err).Msg("Failed to read response body")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -111,14 +110,14 @@ func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Requ
 	var hyperbolicResponse HyperbolicResponse
 	err = json.Unmarshal(body, &hyperbolicResponse)
 	if err != nil {
-		log.Println(err)
+		log.Error().Err(err).Msg("Failed to unmarshal response body")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	openAIResponse, err := convertResponse(hyperbolicResponse, openAIRequest, router.getBaseUrl(r), router.imageCache)
 	if err != nil {
-		log.Println("Error converting response:", err)
+		log.Error().Err(err).Msg("Failed to convert response")
 		http.Error(w, "Failed to convert response", http.StatusInternalServerError)
 		return
 	}

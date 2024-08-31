@@ -1,7 +1,15 @@
 package main
 
 import (
-	"log"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/cheahjs/hyperbolic-openai-proxy/internal/api"
+	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
 	"strconv"
@@ -34,6 +42,20 @@ func main() {
 		maxStoreSizeMB, _ = strconv.Atoi(maxStoreSizeStr)
 	}
 
+	// Initialize logger
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+
+	// Log to console by default
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
+	if envLogLevel := os.Getenv("LOG_LEVEL"); envLogLevel != "" {
+		level, err := zerolog.ParseLevel(envLogLevel)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Invalid LOG_LEVEL")
+		}
+		zerolog.SetGlobalLevel(level)
+	}
+
 	imageCache := cache.NewImageCache(expiryDuration, maxStoreSizeMB, time.Minute)
 
 	router := api.NewRouter(imageCache, baseURL)
@@ -45,6 +67,6 @@ func main() {
 
 	err := http.ListenAndServe(listenAddr, router)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("Failed to start server")
 	}
 }
