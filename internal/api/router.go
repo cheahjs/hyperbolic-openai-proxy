@@ -74,6 +74,8 @@ func (router *Router) imageGenerationHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	log.Info().Str("model", openAIRequest.Model).Msg("Model parsed")
+
 	err = json.Unmarshal(body, &openAIRequest)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to unmarshal request body")
