@@ -107,32 +107,29 @@ func convertRequest(openAIRequest OpenAIRequest) HyperbolicRequest {
 	return hyperbolicRequest
 }
 
-func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAIRequest, baseURL string) OpenAIResponse {
+func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAIRequest, baseURL string) (OpenAIResponse, error) {
 	var openAIResponse OpenAIResponse
 
 	openAIResponse.Created = time.Now().Unix()
 
 	for _, image := range hyperbolicResponse.Images {
 		var openAIImage OpenAIImage
-		if openAIRequest.ResponseFormat != nil && *openAIRequest.ResponseFormat == "url" {
+		if openAIRequest.ResponseFormat != nil && *openAIRequest.ResponseFormat == "b64_json" {
+			openAIImage.B64JSON = image.Image
+		} else { // default to URL
 			id, err := generateUniqueID()
 			if err != nil {
-				log.Println("Error generating unique ID:", err)
-				http.Error(w, "Failed to generate unique ID", http.StatusInternalServerError)
-				return
+				return openAIResponse, fmt.Errorf("failed to generate unique ID: %w", err)
 			}
 
 			expiresAt := time.Now().Add(expiryDuration)
 			imageStore[id] = imageEntry{[]byte(image.Image), expiresAt}
 			openAIImage.URL = fmt.Sprintf("%s/images/%s", baseURL, id)
-
-		} else {
-			openAIImage.B64JSON = image.Image
 		}
 		openAIResponse.Data = append(openAIResponse.Data, openAIImage)
 	}
 
-	return openAIResponse
+	return openAIResponse, nil
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request) {
@@ -236,7 +233,13 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 		baseURL = "http://" + r.Host
 	}
 
-	openAIResponse := convertResponse(hyperbolicResponse, openAIRequest, baseURL)
+	openAIResponse, err := convertResponse(hyperbolicResponse, openAIRequest, baseURL)
+	if err != nil {
+		log.Println("Error converting response:", err)
+		http.Error(w, "Failed to convert response", http.StatusInternalServerError)
+		return
+	}
+
 
 	jsonBody, err = json.Marshal(openAIResponse)
 	if err != nil {
