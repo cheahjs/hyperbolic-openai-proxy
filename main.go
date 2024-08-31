@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -44,6 +45,17 @@ type HyperbolicImage struct {
 	RandomSeed int64  `json:"random_seed"`
 }
 
+// OpenAIResponse represents an OpenAI API response
+type OpenAIResponse struct {
+	Created int64       `json:"created"`
+	Data    []OpenAIImage `json:"data"`
+}
+
+// OpenAIImage represents a generated image in the OpenAI API response
+type OpenAIImage struct {
+	URL string `json:"url"`
+}
+
 func convertRequest(openAIRequest OpenAIRequest) HyperbolicRequest {
 	var hyperbolicRequest HyperbolicRequest
 
@@ -71,6 +83,20 @@ func convertRequest(openAIRequest OpenAIRequest) HyperbolicRequest {
 	hyperbolicRequest.Backend = "auto"
 
 	return hyperbolicRequest
+}
+
+func convertResponse(hyperbolicResponse HyperbolicResponse) OpenAIResponse {
+	var openAIResponse OpenAIResponse
+
+	openAIResponse.Created = time.Now().Unix()
+
+	for _, image := range hyperbolicResponse.Images {
+		var openAIImage OpenAIImage
+		openAIImage.URL = image.Image
+		openAIResponse.Data = append(openAIResponse.Data, openAIImage)
+	}
+
+	return openAIResponse
 }
 
 func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
@@ -138,7 +164,9 @@ func imageGenerationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonBody, err = json.Marshal(hyperbolicResponse)
+	openAIResponse := convertResponse(hyperbolicResponse)
+
+	jsonBody, err = json.Marshal(openAIResponse)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
