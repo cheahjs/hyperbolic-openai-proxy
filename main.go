@@ -283,7 +283,12 @@ func main() {
 		}
 	}()
 
-	err := http.ListenAndServe(":8080", r)
+	listenAddr := ":8080"
+	if envListenAddr := os.Getenv("LISTEN_ADDR"); envListenAddr != "" {
+		listenAddr = envListenAddr
+	}
+
+	err := http.ListenAndServe(listenAddr, r)
 	if err != nil {
 		log.Fatal(err)
 	}
