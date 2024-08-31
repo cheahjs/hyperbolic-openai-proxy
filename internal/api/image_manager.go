@@ -12,7 +12,6 @@ import (
 	_ "image/png"
 	"io"
 	"os"
-	"os"
 	"path/filepath"
 	"sync"
 	"time"
