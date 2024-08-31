@@ -4,10 +4,6 @@ var (
 	baseURL         string
 	maxStoreSizeMB int
 )
-
-func cleanupImageStore() {
-	// TODO: Implement image store cleanup logic
-}
 import (
 	"log"
 	"net/http"
@@ -19,6 +15,15 @@ import (
 	"github.com/cheahjs/hyperbolic-openai-proxy/internal/api"
 	"github.com/cheahjs/hyperbolic-openai-proxy/internal/cache"
 )
+
+var (
+	baseURL         string
+	maxStoreSizeMB int
+)
+
+func cleanupImageStore() {
+	// TODO: Implement image store cleanup logic
+}
 
 func main() {
 	// Resolve environment variables at startup
