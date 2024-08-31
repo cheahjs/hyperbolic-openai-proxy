@@ -110,11 +110,11 @@ func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAI
 	for _, image := range hyperbolicResponse.Images {
 		var openAIImage OpenAIImage
 		if openAIRequest.ResponseFormat != nil && *openAIRequest.ResponseFormat == "url" {
-			id := generateUniqueID()
-			expiryMinutes := 30 // Default expiry time
-			if expiryStr := os.Getenv("IMAGE_EXPIRY_MINUTES"); expiryStr != "" {
-				expiryMinutes, _ = strconv.Atoi(expiryStr)
-			}
+			id := generateUniqueID()			
+			expiryDuration := 30 * time.Minute // Default expiry time
+			if expiryStr := os.Getenv("IMAGE_EXPIRY"); expiryStr != "" {
+				expiryDuration, _ = time.ParseDuration(expiryStr)
+			}			
 			expiresAt := time.Now().Add(time.Duration(expiryMinutes) * time.Minute)
 
 			imageStore[id] = imageEntry{[]byte(image.Image), expiresAt}
