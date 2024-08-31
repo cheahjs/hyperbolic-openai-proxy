@@ -26,8 +26,12 @@ func main() {
 	}
 
 	baseURL = os.Getenv("BASE_URL")
+	scheme := os.Getenv("BASE_URL_SCHEME")
+	if scheme == "" {
+		scheme = "http" // Default to http if not specified
+	}
 	if baseURL != "" && !strings.HasPrefix(baseURL, "http") {
-		baseURL = "http://" + baseURL
+		baseURL = scheme + "://" + baseURL
 	}
 
 	maxStoreSizeMB = 0
