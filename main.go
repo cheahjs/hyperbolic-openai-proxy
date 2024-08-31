@@ -58,6 +58,13 @@ func main() {
 		listenAddr = envListenAddr
 	}
 
+	log.Info().
+		Str("listenAddr", listenAddr).
+		Dur("expiryDuration", expiryDuration).
+		Str("baseURL", baseURL).
+		Int("maxStoreSizeMB", maxStoreSizeMB).
+		Msg("Starting server")
+
 	err := http.ListenAndServe(listenAddr, router)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to start server")
