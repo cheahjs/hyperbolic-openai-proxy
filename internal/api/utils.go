@@ -10,12 +10,12 @@ import (
 )
 
 type OpenAIImage struct {
-	URL      string `json:"url,omitempty"`
+	URL     string `json:"url,omitempty"`
 	B64JSON string `json:"b64_json,omitempty"`
 }
 
 type OpenAIResponse struct {
-	Created int64          `json:"created"`
+	Created int64         `json:"created"`
 	Data    []OpenAIImage `json:"data"`
 }
 
