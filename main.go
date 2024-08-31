@@ -53,7 +53,7 @@ type OpenAIResponse struct {
 
 // OpenAIImage represents a generated image in the OpenAI API response
 type OpenAIImage struct {
-	URL string `json:"url"`
+	B64JSON string `json:"b64_json"`
 }
 
 func convertRequest(openAIRequest OpenAIRequest) HyperbolicRequest {
@@ -92,7 +92,7 @@ func convertResponse(hyperbolicResponse HyperbolicResponse) OpenAIResponse {
 
 	for _, image := range hyperbolicResponse.Images {
 		var openAIImage OpenAIImage
-		openAIImage.URL = image.Image
+		openAIImage.B64JSON = image.Image
 		openAIResponse.Data = append(openAIResponse.Data, openAIImage)
 	}
 
