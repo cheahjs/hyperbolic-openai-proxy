@@ -115,10 +115,12 @@ func convertResponse(hyperbolicResponse HyperbolicResponse, openAIRequest OpenAI
 			if expiryStr := os.Getenv("IMAGE_EXPIRY"); expiryStr != "" {
 				expiryDuration, _ = time.ParseDuration(expiryStr)
 			}
-			expiresAt := time.Now().Add(time.Duration(expiryMinutes) * time.Minute)
+			}			
+			expiresAt := time.Now().Add(expiryDuration)
 
 			imageStore[id] = imageEntry{[]byte(image.Image), expiresAt}
 			openAIImage.URL = fmt.Sprintf("%s/images/%s", baseURL, id)
+
 		} else {
 			openAIImage.B64JSON = image.Image
 		}
