@@ -272,13 +272,13 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
-func generateUniqueID() string {
+func generateUniqueID() (string, error) {
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return hex.EncodeToString(b)
+	return hex.EncodeToString(b), nil
 }
 
 func cleanupImageStore() {
